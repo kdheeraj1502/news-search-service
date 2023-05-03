@@ -10,10 +10,24 @@ pipeline {
                 bat 'mvn clean install'
             }
         }
-        stage('Build docker image') {
+        stage('Test') {
             steps {
                 script {
-                    bat 'docker build -t kdheeraj1512/news-search-service .'
+                     bat 'mvn clean install'
+                }
+            }
+        }
+        stage('Test') {
+                    steps {
+                        script {
+                             bat 'mvn test'
+                        }
+                    }
+                }
+        stage('Deploy') {
+            steps {
+                script {
+                    bat 'java -jar news-search-service.jar'
                 }
             }
         }

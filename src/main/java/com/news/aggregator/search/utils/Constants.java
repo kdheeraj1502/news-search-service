@@ -6,11 +6,6 @@ import lombok.experimental.UtilityClass;
 public class Constants {
 
     @UtilityClass
-    public static class CommonFormats {
-        public static final String RESPONSE_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-        public static final String DB_STRING_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'+'";
-    }
-    @UtilityClass
     public static class NewsURLs {
         public static final String NY_TIMES_US_URL = "https://api.nytimes.com/svc/search/v2/articlesearch.json?q=";
         public static final String GUARDIAN_UK_URL = "https://content.guardianapis.com/search?q=";
@@ -28,7 +23,6 @@ public class Constants {
 
     /**
      * Utility Class for routes constants
-     * <a href="https://cloud.google.com/apis/design">Google Resource Oriented API design</a>
      */
     @UtilityClass
     public static class Routes {

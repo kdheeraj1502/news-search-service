@@ -1,7 +1,5 @@
 package com.news.aggregator.search.controllers;
 
-import com.news.aggregator.search.dtos.NewsData;
-import com.news.aggregator.search.exceptions.RecordNotFoundException;
 import com.news.aggregator.search.models.NewsResponseMaster;
 import com.news.aggregator.search.services.NewsSearchService;
 import com.news.aggregator.search.utils.Constants;
@@ -19,13 +17,11 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.Min;
-import java.util.List;
-import java.util.Map;
 
 @Validated
 @RestController
 @RequestMapping(Constants.Routes.NEWS_REQUEST)
-@Api(value = "hello", description = "shows hello world")
+@Api(value = "Provides API to customise the user search on International news")
 public class NewsController {
 
     private static final Logger LOG = LoggerFactory.getLogger(NewsController.class);
@@ -35,25 +31,27 @@ public class NewsController {
 
     private static final BeanUtilsBean beanUtils = new NullAwareBeanUtils();
 
-    @ApiOperation(value = "Returns Hello World")
+    @ApiOperation(value = "Health Check")
     @RequestMapping(value = "/ping", method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity ping() {
         return ResponseEntity.ok().body("Success!");
     }
 
 
-    @ApiOperation(value = "Returns Hello World")
+    @ApiOperation(value = "This API is exposed for user search on Internation news")
     @ApiResponses(
             value = {
-                    @ApiResponse(code = 100, message = "100 is the message"),
-                    @ApiResponse(code = 200, message = "Successful Hello World")
+                    @ApiResponse(code = 400, message = "Bad request"),
+                    @ApiResponse(code = 200, message = "Successful"),
+                    @ApiResponse(code = 200, message = "The used search news", response = NewsResponseMaster.class)
             }
+
     )
     @GetMapping(value = Constants.Routes.ARTICLE_SEARCH + "/{query}", produces = "application/json")
     public NewsResponseMaster searchNews(@PathVariable(value = "query", required = true) String query,
                                          @RequestParam(name = Constants.UrlParameters.PAGE, defaultValue = "1") @Min(1) int page,
                                          @RequestParam(name = Constants.UrlParameters.PER_PAGE, defaultValue = "100") @Min(5) int perPage)  {
-        LOG.info("Searching News for keyword : {} ", query);
+        LOG.info("The search keyword for News is : {} ", query);
         return newsSearchService.searchNews(page, perPage,query);
     }
 } 
