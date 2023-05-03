@@ -1,6 +1,6 @@
 # News Service Rest API
 
-Back-end architecture of news service, based on mysql and spring boot. It contains various news related APIs.
+Back-end architecture of news service, based on search to NYTimes US, Guardian UK and spring boot. It contains International news related information.
 
 ## Getting Started
 
@@ -11,7 +11,6 @@ These instructions will get you a copy of the project up and running on your loc
 ```
 Maven
 Java
-MySQL
 ```
 
 ### Installing
@@ -19,17 +18,9 @@ MySQL
 Clone & Install
 
 ```
-Clone the repo: git clone git@github.com:rajnikant7008/RestAPI.git
+Clone the repo: git clone https://github.com/kdheeraj1502/news-search-service.git
 Install dependencies: mvn clean compile install -DskipTests
 ```
-
-MySql Queries
-
-```
-Configure mysql user name and password in : src/main/resources/application.properties
-Run queries from : src/main/resources/release-sql/schema.1.0.sql
-```
-
 
 ## Deployment
 
@@ -61,8 +52,6 @@ And hit APIs as listed below.
 * [Spring Boot](https://projects.spring.io/spring-boot/) - The web/application framework used
 * [SpringFox](http://springfox.github.io/springfox/) - API documentation
 * [Maven](https://maven.apache.org/) - Dependency Management
-* [MySQL](https://www.mysql.com/) - Used for persistent storage
-* [Hibernate](http://hibernate.org/) - Object/Relational Mapping (ORM) framework
 
 
 ## License
