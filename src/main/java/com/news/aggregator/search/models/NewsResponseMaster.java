@@ -15,7 +15,6 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NewsResponseMaster extends BaseAuditModel {
-
     private Map<String, List<String>> URL;
     private Map<String, List<String>> headline;
     private int totalNoOfPages;
@@ -24,7 +23,7 @@ public class NewsResponseMaster extends BaseAuditModel {
     private int dataCount;
     private int previousPageNo;
     private int nextPageNo;
-    private long timeTaken;
+    private String timeTaken;
 
 }
 

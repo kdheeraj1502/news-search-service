@@ -1,11 +1,14 @@
 package com.news.aggregator.search.utils;
 
 import com.news.aggregator.search.dtos.*;
+import com.news.aggregator.search.models.NewsResponseMaster;
 import com.news.aggregator.search.models.PageDetails;
+import lombok.experimental.UtilityClass;
 
 import java.time.LocalDate;
 import java.util.*;
 
+@UtilityClass
 public class NewsResponseUtility {
 
     public static NewsResponse createResponse(GuardianUKNewsResponseMaster guardianUKNewsResponseMaster,
@@ -61,5 +64,39 @@ public class NewsResponseUtility {
         todaysNews.put(today, news);
         newsResponse.setTodaysNews(todaysNews);
         return newsResponse;
+    }
+
+    public static NewsResponseMaster createResponse(
+            List<Map<String, NewsData>> result,
+            List<PageDetails> pageDetails,
+            int page, int perPage,
+            String query){
+        NewsResponseMaster newsResponseMaster = new NewsResponseMaster();
+        newsResponseMaster.setCreatedAt(new Date());
+        newsResponseMaster.setTotalNoOfPages(pageDetails.get(0).getPageSize());
+        newsResponseMaster.setUserSearchKeyword(query);
+        newsResponseMaster.setDataCount(pageDetails.get(0).getTotalData());
+        newsResponseMaster.setPreviousPageNo(page);
+        newsResponseMaster.setNextPageNo(page + 1);
+        Map<String, List<String>> urlMap = new HashMap<>();
+        List<String> urls = new ArrayList<>();
+        Map<String, List<String>> headlineMap = new HashMap<>();
+        List<String> headlines = new ArrayList<>();
+        for(Map<String, NewsData> res : result){
+            Set<Map.Entry<String, NewsData>> dataSet = res.entrySet();
+            Iterator<Map.Entry<String, NewsData>> it = dataSet.iterator();
+            while(it.hasNext()){
+                Map.Entry<String, NewsData> entry = it.next();
+                urls.add(entry.getKey());
+                headlines.add(entry.getValue().getHeadlines());
+                newsResponseMaster.setCity(entry.getValue().getSection());
+            }
+        }
+        urlMap.put("URLs", urls);
+        headlineMap.put("Headlines", headlines);
+        newsResponseMaster.setURL(urlMap);
+        newsResponseMaster.setHeadline(headlineMap);
+        newsResponseMaster.setUpdatedAt(new Date());
+        return newsResponseMaster;
     }
 }

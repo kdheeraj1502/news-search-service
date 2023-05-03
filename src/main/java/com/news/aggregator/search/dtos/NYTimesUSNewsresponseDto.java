@@ -5,12 +5,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.springframework.stereotype.Component;
 
 @Setter
 @Getter
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@Component
 public class NYTimesUSNewsresponseDto {
 
     private String abstractData;

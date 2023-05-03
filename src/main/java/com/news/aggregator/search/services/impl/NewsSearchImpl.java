@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.news.aggregator.search.dtos.*;
 import com.news.aggregator.search.exceptions.JsonParsingException;
-import com.news.aggregator.search.exceptions.NewsCustomExceptionHandler;
 import com.news.aggregator.search.exceptions.RecordNotFoundException;
 import com.news.aggregator.search.models.NewsResponseMaster;
 import com.news.aggregator.search.models.PageDetails;
@@ -12,6 +11,7 @@ import com.news.aggregator.search.services.NewsSearchService;
 import com.news.aggregator.search.utils.Constants;
 import com.news.aggregator.search.utils.NewsResponseUtility;
 import com.news.aggregator.search.utils.PaginationUtility;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +20,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-//@Slf4j
+@Slf4j
 @Service
 public class NewsSearchImpl implements NewsSearchService {
     private final Logger LOG = LoggerFactory.getLogger(NewsSearchImpl.class);
@@ -32,57 +33,51 @@ public class NewsSearchImpl implements NewsSearchService {
     private static final String API_KEY = "RC0IVXfM38l8G0QRyd0CCbkEQQxOW8mr";
     private static final String A_API_KY = "4c494de1-e09d-45b9-914a-8cf86657c045";
 
-    //  @Autowired
-    // private NewsResponseMapper newsResponseMapper;
+    @Autowired
+    private GuardianUKNewsResponseMaster guardianUKNewsResponseMaster;
+
 
     @Autowired
     private RestTemplate restTemplate;
 
+    private Map<LocalDate,Map<PageDetails, List<Map<String, NewsData>>>> todaysNews;
+
+
+    @PostConstruct
+    public void initialize(){
+        this.todaysNews = new HashMap<>();
+    }
+
     public NewsResponseMaster searchNews(int page, int perPage, String query) {
-        NewsResponseMaster newsResponseMaster = new NewsResponseMaster();
         try{
             long startTime = System.currentTimeMillis();
-            newsResponseMaster.setCreatedAt(new Date());
-            List<NYTimesUSNewsresponseDto> nyTimesUSNewsresponseDtoList = NYTimesUSNewsSearch(query);
-            GuardianUKNewsResponseMaster guardianUKNewsResponseMaster = guardianUKNewsSearch(query);
-            NewsResponse newsResponse = NewsResponseUtility.createResponse(guardianUKNewsResponseMaster, nyTimesUSNewsresponseDtoList);
-            Set<Map.Entry<PageDetails, List<Map<String, NewsData>>>> set =  newsResponse.getTodaysNews().get(LocalDate.now()).entrySet();
+            LocalDate todaysDate = LocalDate.now();
+            List<NYTimesUSNewsresponseDto> nyTimesUSNewsresponseDtoList = null;
+            GuardianUKNewsResponseMaster guardianUKNewsResponseMaster = null;
+            NewsResponse newsResponse = null;
+            if(!this.todaysNews.containsKey(todaysDate)){
+                nyTimesUSNewsresponseDtoList = NYTimesUSNewsSearch(query);
+                guardianUKNewsResponseMaster = guardianUKNewsSearch(query);
+                newsResponse = NewsResponseUtility.createResponse(guardianUKNewsResponseMaster, nyTimesUSNewsresponseDtoList);
+                this.todaysNews = newsResponse.getTodaysNews();
+                LOG.info("Data from NYTimes and Guardings");
+            }
+            Set<Map.Entry<PageDetails, List<Map<String, NewsData>>>> set = this.todaysNews.get(todaysDate).entrySet();
             Iterator<Map.Entry<PageDetails, List<Map<String, NewsData>>>> iterator = set.iterator();
             List<Map<String, NewsData>> source = new ArrayList<>();
-            List<PageDetails> pageDetails =
-                    newsResponse.getTodaysNews().get(LocalDate.now()).keySet().stream().collect(Collectors.toList());
+            List<PageDetails> pageDetails = this.todaysNews.get(todaysDate).keySet().stream().collect(Collectors.toList());
             while(iterator.hasNext()){
                 Map.Entry<PageDetails, List<Map<String, NewsData>>> entry = iterator.next();
                 source.addAll(entry.getValue());
             }
-            newsResponseMaster.setTotalNoOfPages(pageDetails.get(0).getPageSize());
-            newsResponseMaster.setUserSearchKeyword(query);
-            newsResponseMaster.setDataCount(pageDetails.get(0).getTotalData());
-            newsResponseMaster.setPreviousPageNo(page);
-            newsResponseMaster.setNextPageNo(page + 1);
-
-            Map<String, List<String>> urlMap = new HashMap<>();
-             List<String> urls = new ArrayList<>();
-             Map<String, List<String>> headlineMap = new HashMap<>();
-             List<String> headlines = new ArrayList<>();
             List<Map<String, NewsData>> result = PaginationUtility.getPage(source, page, perPage);
-            for(Map<String, NewsData> res : result){
-                Set<Map.Entry<String, NewsData>> dataSet = res.entrySet();
-                Iterator<Map.Entry<String, NewsData>> it = dataSet.iterator();
-                while(it.hasNext()){
-                    Map.Entry<String, NewsData> entry = it.next();
-                    urls.add(entry.getKey());
-                    headlines.add(entry.getValue().getHeadlines());
-                    newsResponseMaster.setCity(entry.getValue().getSection());
-                }
-            }
-            urlMap.put("URLs", urls);
-            headlineMap.put("Headlines", headlines);
-            newsResponseMaster.setURL(urlMap);
-            newsResponseMaster.setHeadline(headlineMap);
-            newsResponseMaster.setUpdatedAt(new Date());
+            NewsResponseMaster newsResponseMaster = NewsResponseUtility.createResponse(result, pageDetails, page, perPage, query);
+            long endTime = System.currentTimeMillis();
+            long timeDifference = (endTime - startTime) / 1000;
+            newsResponseMaster.setTimeTaken(timeDifference + " S");
             return newsResponseMaster;
         } catch(Exception exception){
+            LOG.error("News for :: [ " + query + " ] does no exist. Please check your search query");
             throw new RecordNotFoundException("News for :: [ " + query + " ] does no exist. Please check your search query");
         }
     }
@@ -119,6 +114,7 @@ public class NewsSearchImpl implements NewsSearchService {
                 nyTimesUSNewsresponseDtoList.add(nyTimesUSNewsresponse);
             }
         } catch (JsonProcessingException exception) {
+            LOG.error("The news response could not be parsed");
             throw new JsonParsingException("The news response could not be parsed");
         } catch (Exception exception) {
             throw new RecordNotFoundException("News report not found for search query");
@@ -129,7 +125,6 @@ public class NewsSearchImpl implements NewsSearchService {
     private  GuardianUKNewsResponseMaster  guardianUKNewsSearch(String query) {
         ResponseEntity<String> response = null;
         GuardianUKNewsResponse guardianUKNewsResponse = null;
-        GuardianUKNewsResponseMaster guardianUKNewsResponseMaster = new GuardianUKNewsResponseMaster();
         List<GuardianUKNewsResponseDto> guardianUKNewsResponseDtoList = new ArrayList<>();
         try {
             response = this.restTemplate.exchange(
@@ -163,8 +158,10 @@ public class NewsSearchImpl implements NewsSearchService {
             }
             guardianUKNewsResponseMaster.setGuardianUKNewsResponseDtoList(guardianUKNewsResponseDtoList);
         } catch (JsonProcessingException exception) {
+            LOG.error("The news response could not be parsed");
             throw new JsonParsingException("The news response could not be parsed");
         } catch (Exception exception) {
+            LOG.error("News report not found for search query");
             throw new RecordNotFoundException("News report not found for search query");
         }
         return guardianUKNewsResponseMaster;
