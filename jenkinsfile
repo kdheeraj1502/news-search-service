@@ -1,0 +1,31 @@
+pipeline {
+    agent any
+    tools {
+        maven 'maven_3_8_4'
+    }
+    stages {
+        stage('Build Maven') {
+            steps {
+                checkout scmGit(branches: [[name: '**']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/kdheeraj1502/news-search-service.git']])
+                bat 'mvn clean install'
+            }
+        }
+        stage('Build docker image') {
+            steps {
+                script {
+                    bat 'docker build -t kdheeraj1512/news-search-service .'
+                }
+            }
+        }
+        stage('Push docker to hub') {
+            steps {
+				script {
+					withCredentials([string(credentialsId: 'dockerhubpassword', variable: 'dockerhubpassword')]) {
+						bat 'docker login -u kdheeraj1512 -p ${dockerhubpassword}'
+					}
+                bat 'docker push kdheeraj1512/news-search-service'
+				}
+            }
+        }
+    }
+}
