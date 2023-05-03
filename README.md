@@ -45,6 +45,11 @@ Start the server and open: http://localhost:8080
 And hit APIs as listed below.
 ```
 
+##### Using Jenkins And Docker
+```
+Using docker for image creation to run on clound computing
+```
+
 ![API Screenshot](/api_preview.png)
 
 ## Built With
