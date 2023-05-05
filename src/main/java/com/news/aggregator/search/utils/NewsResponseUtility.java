@@ -1,6 +1,7 @@
 package com.news.aggregator.search.utils;
 
 import com.news.aggregator.search.dtos.*;
+import com.news.aggregator.search.models.Key;
 import com.news.aggregator.search.models.NewsResponseMaster;
 import com.news.aggregator.search.models.PageDetails;
 import lombok.experimental.UtilityClass;
@@ -10,9 +11,11 @@ import java.util.*;
 
 @UtilityClass
 public class NewsResponseUtility {
+    private Map<Key, Map<PageDetails, List<Map<String, NewsData>>>> todaysNews = new HashMap<>();
 
     public static NewsResponse createResponse(GuardianUKNewsResponseMaster guardianUKNewsResponseMaster,
-                                              List<NYTimesUSNewsresponseDto> nyTimesUSNewsresponseDtoList){
+                                              List<NYTimesUSNewsresponseDto> nyTimesUSNewsresponseDtoList,
+                                              String query){
         List<GuardianUKNewsResponseDto> guardianUKNewsResponseDtoList = guardianUKNewsResponseMaster.getGuardianUKNewsResponseDtoList();
 
         NewsResponse newsResponse = new NewsResponse();
@@ -59,10 +62,10 @@ public class NewsResponseUtility {
         int pageSize = pageDetails.getPageSize() + nyTimesUSNewsresponseDtoList.size() ;
         pageDetails.setPageSize(pageSize);
         news.put(pageDetails, newsList);
-        Map<LocalDate,Map<PageDetails, List<Map<String, NewsData>>>> todaysNews = new HashMap<>();
-        LocalDate today = LocalDate.now();
-        todaysNews.put(today, news);
+        Key key = createCacheKey(query);
+        todaysNews.put(key, news);
         newsResponse.setTodaysNews(todaysNews);
+
         return newsResponse;
     }
 
@@ -98,5 +101,10 @@ public class NewsResponseUtility {
         newsResponseMaster.setHeadline(headlineMap);
         newsResponseMaster.setUpdatedAt(new Date());
         return newsResponseMaster;
+    }
+
+    public static Key createCacheKey(String query){
+        LocalDate today = LocalDate.now();
+        return new Key(query, today);
     }
 }

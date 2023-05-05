@@ -5,6 +5,7 @@ import com.news.aggregator.search.dtos.NYTimesUSNewsresponseDto;
 import com.news.aggregator.search.dtos.NewsData;
 import com.news.aggregator.search.dtos.NewsResponse;
 import com.news.aggregator.search.exceptions.RecordNotFoundException;
+import com.news.aggregator.search.models.Key;
 import com.news.aggregator.search.models.NewsResponseMaster;
 import com.news.aggregator.search.models.PageDetails;
 import com.news.aggregator.search.services.NewsSearchService;
@@ -40,7 +41,7 @@ public class NewsSearchImpl implements NewsSearchService {
     @Autowired
     private BringNews bringNews;
 
-    private Map<LocalDate, Map<PageDetails, List<Map<String, NewsData>>>> todaysNews;
+    private Map<Key, Map<PageDetails, List<Map<String, NewsData>>>> todaysNews;
 
 
     @PostConstruct
@@ -54,24 +55,26 @@ public class NewsSearchImpl implements NewsSearchService {
             NYTimesUSNews nyTimesUSNews = new NYTimesUSNews(bringNews);
             NewsBroker newsBroker = new NewsBroker();
             long startTime = System.currentTimeMillis();
-            LocalDate todaysDate = LocalDate.now();
             List<NYTimesUSNewsresponseDto> nyTimesUSNewsresponseDtoList = null;
             GuardianUKNewsResponseMaster guardianUKNewsResponseMaster = null;
             NewsResponse newsResponse = null;
-            if (!this.todaysNews.containsKey(todaysDate)) {
+            Key cacheKey = NewsResponseUtility.createCacheKey(query);
+            if (!this.todaysNews.containsKey(cacheKey)) {
+
                 newsBroker.takeSearch(guardianUKNews);
                 newsBroker.takeSearch(nyTimesUSNews);
                 newsBroker.bringNews(query);
                 nyTimesUSNewsresponseDtoList = nyTimesUSNews.getNyTimesUSNewsresponseDtoList();
                 guardianUKNewsResponseMaster = guardianUKNews.getGuardianUKNewsResponseMaster();
-                newsResponse = NewsResponseUtility.createResponse(guardianUKNewsResponseMaster, nyTimesUSNewsresponseDtoList);
+                newsResponse = NewsResponseUtility.createResponse(guardianUKNewsResponseMaster, nyTimesUSNewsresponseDtoList, query);
                 this.todaysNews = newsResponse.getTodaysNews();
                 LOG.info("Data from NYTimes and Guardings");
             }
-            Set<Map.Entry<PageDetails, List<Map<String, NewsData>>>> set = this.todaysNews.get(todaysDate).entrySet();
+
+            Set<Map.Entry<PageDetails, List<Map<String, NewsData>>>> set = this.todaysNews.get(cacheKey).entrySet();
             Iterator<Map.Entry<PageDetails, List<Map<String, NewsData>>>> iterator = set.iterator();
             List<Map<String, NewsData>> source = new ArrayList<>();
-            List<PageDetails> pageDetails = this.todaysNews.get(todaysDate).keySet().stream().collect(Collectors.toList());
+            List<PageDetails> pageDetails = this.todaysNews.get(cacheKey).keySet().stream().collect(Collectors.toList());
             while (iterator.hasNext()) {
                 Map.Entry<PageDetails, List<Map<String, NewsData>>> entry = iterator.next();
                 source.addAll(entry.getValue());

@@ -1,5 +1,6 @@
 package com.news.aggregator.search.dtos;
 
+import com.news.aggregator.search.models.Key;
 import com.news.aggregator.search.models.PageDetails;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,7 +18,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NewsResponse {
-    private Map<LocalDate,Map<PageDetails, List<Map<String, NewsData>>>> todaysNews;
+    private Map<Key,Map<PageDetails, List<Map<String, NewsData>>>> todaysNews;
 
 }
 
