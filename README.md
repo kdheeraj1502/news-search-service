@@ -50,15 +50,23 @@ And hit APIs as listed below.
 Using docker for image creation to run on clound computing
 ```
 
-![API Screenshot](/api_preview.png)
-
 ## Built With
 
+```
 * [Spring Boot](https://projects.spring.io/spring-boot/) - The web/application framework used
 * [SpringFox](http://springfox.github.io/springfox/) - API documentation
 * [Maven](https://maven.apache.org/) - Dependency Management
+```
 
+## Cache
 
-## License
+```
+This project is using readthrough cache for single day static news updates
+```
 
-This project is licensed under the Apache License - see the [LICENSE.md](/LICENSE) file for details
+## Readthrough Cache
+
+```
+readthrough cache is a type of cache that automatically loads data from a data source into the cache when it is requested by an application. 
+This can help reduce the number of times that an application needs to access the data source directly, which can improve the overall performance of the application.
+```
