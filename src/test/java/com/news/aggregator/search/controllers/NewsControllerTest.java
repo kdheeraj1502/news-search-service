@@ -1,6 +1,7 @@
 package com.news.aggregator.search.controllers;
 
 import com.news.aggregator.search.services.NewsSearchService;
+import com.news.aggregator.search.utils.Constants;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -26,8 +27,20 @@ public class NewsControllerTest {
     }
 
     @Test
-    void testGetAllProducts() throws Exception{
-        mockMvc.perform(get("/v1/news/article/search/apple?page=2&per_page=10"))
+    void pingTest() throws Exception{
+        mockMvc.perform(get(Constants.Routes.NEWS_REQUEST + "/ping"))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void searchNewsTest() throws Exception{
+        mockMvc.perform(get(Constants.Routes.NEWS_REQUEST + Constants.Routes.ARTICLE_SEARCH + "/apple?page=2&per_page=10"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void searchNewsExceptionTest() throws Exception{
+        mockMvc.perform(get(Constants.Routes.NEWS_REQUEST + Constants.Routes.ARTICLE_SEARCH + "/?page=2&per_page=10"))
+                .andExpect(status().is4xxClientError());
     }
 }
