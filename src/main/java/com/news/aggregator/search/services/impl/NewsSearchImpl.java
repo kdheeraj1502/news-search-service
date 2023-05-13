@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -27,9 +28,6 @@ import java.util.stream.Collectors;
 @Service
 public class NewsSearchImpl implements NewsSearchService {
     private final Logger LOG = LoggerFactory.getLogger(NewsSearchImpl.class);
-
-    private static final String API_KEY = "RC0IVXfM38l8G0QRyd0CCbkEQQxOW8mr";
-    private static final String A_API_KY = "4c494de1-e09d-45b9-914a-8cf86657c045";
 
     @Autowired
     private GuardianUKNewsResponseMaster guardianUKNewsResponseMaster;
