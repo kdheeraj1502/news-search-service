@@ -10,21 +10,20 @@ import com.news.aggregator.search.models.PageDetails;
 import com.news.aggregator.search.services.impl.*;
 import com.news.aggregator.search.utils.NewsResponseUtility;
 import com.news.aggregator.search.utils.PaginationUtility;
-import org.junit.Assert;
+
+
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
-@RunWith(MockitoJUnitRunner.class)
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class NewsSearchImplTest {
 
     @Test
-    public void searchNewsTest(){
+    public void searchNewsTest() {
         final int page = 0;
         final int perPage = 10;
         final String query = "apple";
@@ -38,7 +37,7 @@ public class NewsSearchImplTest {
         NYTimesUSNews nyTimesUSNews = Mockito.mock(NYTimesUSNews.class);
         NewsResponseMaster newsResponseMaster = Mockito.mock(NewsResponseMaster.class);
 
-       NewsSearchService newsSearchService = new NewsSearchImpl(
+        NewsSearchService newsSearchService = new NewsSearchImpl(
                 guardianUKNewsResponseMaster,
                 restTemplate,
                 bringNews,
@@ -68,8 +67,6 @@ public class NewsSearchImplTest {
                 .thenReturn(newsResponse);
         Mockito.doNothing().when(newsBroker).bringNews(query);
 
-       Assert.assertEquals(newsResponseMaster, newsSearchService.searchNews(page, perPage, query));
-
-
+        assertEquals(newsResponseMaster, newsSearchService.searchNews(page, perPage, query));
     }
 }
