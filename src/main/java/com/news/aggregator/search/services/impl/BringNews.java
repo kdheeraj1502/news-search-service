@@ -9,6 +9,7 @@ import com.news.aggregator.search.utils.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +24,11 @@ public class BringNews<T> {
 
     private final Logger LOG = LoggerFactory.getLogger(NewsSearchImpl.class);
 
-    private static final String API_KEY = "RC0IVXfM38l8G0QRyd0CCbkEQQxOW8mr";
-    private static final String A_API_KY = "4c494de1-e09d-45b9-914a-8cf86657c045";
+    @Value("${ny.time.us.api.key}")
+    private String API_KEY;
+
+    @Value("${guardian.uk.api.key}")
+    private String A_API_KY;
 
     @Autowired
     private RestTemplate restTemplate;
