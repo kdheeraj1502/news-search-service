@@ -41,24 +41,48 @@ public class NewsSearchImpl implements NewsSearchService {
 
     private Map<Key, Map<PageDetails, List<Map<String, NewsData>>>> todaysNews;
 
+    @Autowired
+    private NewsBroker newsBroker;
+
+    private GuardianUKNews guardianUKNews;
+
+    private NYTimesUSNews nyTimesUSNews;
+
+    public NewsSearchImpl(){}
+
+    public NewsSearchImpl(
+            GuardianUKNewsResponseMaster guardianUKNewsResponseMaster,
+            RestTemplate restTemplate,
+            BringNews bringNews,
+    Map<Key, Map<PageDetails, List<Map<String, NewsData>>>> todaysNews,
+            NewsBroker newsBroker,
+            GuardianUKNews guardianUKNews,
+            NYTimesUSNews nyTimesUSNews){
+        this.guardianUKNewsResponseMaster = guardianUKNewsResponseMaster;
+        this.restTemplate = restTemplate;
+        this.bringNews = bringNews;
+        this.todaysNews = todaysNews;
+        this.newsBroker = newsBroker;
+        this.guardianUKNews = guardianUKNews;
+        this.nyTimesUSNews = nyTimesUSNews;
+    }
+
 
     @PostConstruct
     public void initialize() {
         this.todaysNews = new HashMap<>();
+        this.guardianUKNews = new GuardianUKNews(bringNews);
+        this.nyTimesUSNews = new NYTimesUSNews(bringNews);
     }
 
     public NewsResponseMaster searchNews(int page, int perPage, String query) {
         try {
-            GuardianUKNews guardianUKNews = new GuardianUKNews(bringNews);
-            NYTimesUSNews nyTimesUSNews = new NYTimesUSNews(bringNews);
-            NewsBroker newsBroker = new NewsBroker();
             long startTime = System.currentTimeMillis();
             List<NYTimesUSNewsresponseDto> nyTimesUSNewsresponseDtoList = null;
             GuardianUKNewsResponseMaster guardianUKNewsResponseMaster = null;
             NewsResponse newsResponse = null;
             Key cacheKey = NewsResponseUtility.createCacheKey(query);
             if (!this.todaysNews.containsKey(cacheKey)) {
-
                 newsBroker.takeSearch(guardianUKNews);
                 newsBroker.takeSearch(nyTimesUSNews);
                 newsBroker.bringNews(query);

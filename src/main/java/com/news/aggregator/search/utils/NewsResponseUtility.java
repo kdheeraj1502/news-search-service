@@ -72,7 +72,8 @@ public class NewsResponseUtility {
     public static NewsResponseMaster createResponse(
             List<Map<String, NewsData>> result,
             List<PageDetails> pageDetails,
-            int page, int perPage,
+            int page,
+            int perPage,
             String query){
         NewsResponseMaster newsResponseMaster = new NewsResponseMaster();
         newsResponseMaster.setCreatedAt(new Date());
